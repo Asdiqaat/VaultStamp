@@ -1,0 +1,27 @@
+{
+  "canisters": {
+    "vaultstamp_backend": {
+      "main": "src/vaultstamp_backend/main.mo",
+      "type": "motoko",
+      "no_wallet": true
+    },
+    "vaultstamp_frontend": {
+      "dependencies": [
+        "vaultstamp_backend"
+      ],
+      "source": [
+        "src/vaultstamp_frontend"
+      ],
+      "type": "assets"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}
+
