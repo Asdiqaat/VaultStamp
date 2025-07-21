@@ -1,4 +1,3 @@
-
 # 🛡️ VaultStamp
 
 Protect your creative work with blockchain timestamps and AI-powered originality verification.
@@ -9,33 +8,68 @@ VaultStamp helps designers, creators, and innovators prove ownership of their di
 
 ## ✨ Features
 
-- 🔏 **Blockchain Timestamping** — using ICP, cheap and safest. Cryptographic proof that your design existed first  
-- 🧠 **AI Similarity Detection** — Scan the web for 90%+ matches of your work  
-     ---
-
-## 🖼️ Overview
-
-A simple, clean UI for uploading, verifying, and protecting original digital creations.
-
+- 🔏 **Blockchain Timestamping** — Cryptographic proof that your design existed first, using ICP.
+- 🧠 **AI Similarity Detection** — Scan the web for 90%+ matches of your work.
+- 🔐 **Wallet Authentication** — Connect with Solana wallet, non-custodial, privacy-first.
+- 🖼️ **Simple UI** — Upload, verify, and manage your designs easily.
+- 🛡️ **On-chain Hash Storage** — No files stored, only cryptographic fingerprints.
+- 📬 **Plagiarism Alerts** — (Planned) Get notified if your design is found elsewhere.
+- 🗂️ **My Stamps** — View all your uploads and their verification status.
 
 ---
 
-## 🚀 Quick Start
+## 🖼️ Overview
+
+VaultStamp is a web app for uploading, verifying, and protecting original digital creations.  
+It uses a clean, modern UI and integrates with ICP for secure, on-chain proof of ownership.
+
+---
+
+## 🚀 Local Development & Deployment
 
 ### Prerequisites
 
+- [DFINITY SDK (dfx)](https://internetcomputer.org/docs/current/developer-docs/setup/sdk-installation/) installed
+- Node.js and npm (for frontend builds, if needed)
 - A modern browser (Chrome, Firefox, Edge)
 - A public key from **Solana** wallet
 - Internet access
 
-### Run Locally
+### Steps
 
-```bash
-git clone https://github.com/Asdiqaat/VaultStamp.git
-cd VaultStamp
-```
+1. **Clone the repository**
+    ```bash
+    git clone https://github.com/Asdiqaat/VaultStamp.git
+    cd VaultStamp
+    ```
 
-Then open `src/vaultstamp_frontend/index.html` in your browser or use a live server extension (e.g. VS Code Live Server).
+2. **Start the ICP Local Replica**
+    ```bash
+    dfx start --background
+    ```
+
+3. **Generate and Build Canisters**
+    ```bash
+    dfx generate
+    dfx build
+    ```
+
+4. **Deploy the Canisters**
+    ```bash
+    dfx deploy
+    ```
+
+5. **Build the Frontend (if you make changes to JS/CSS)**
+    ```bash
+    # If you use npm scripts for bundling/minification
+    npm install
+    npm run build
+    ```
+
+6. **Run the Frontend**
+    - Open `src/vaultstamp_frontend/index.html` directly in your browser  
+      *or*  
+    - Use a live server extension (e.g. VS Code Live Server) for hot reload
 
 ---
 
@@ -44,52 +78,30 @@ Then open `src/vaultstamp_frontend/index.html` in your browser or use a live ser
 ```
 VaultStamp/
 ├── src/
-│ ├── vaultstamp_backend/ <- Motoko backend code
-│ └── vaultstamp_frontend/ <- Frontend website (HTML, CSS, JS)
-├── dfx.json <- DFINITY project config
-├── README.md <- Project documentation
-└── .gitignore <- Files to ignore in Git
-
+│   ├── vaultstamp_backend/
+│   │   └── main.mo              # Motoko backend canister code
+│   └── vaultstamp_frontend/
+│       ├── index.html           # Main frontend HTML
+│       ├── style.css            # Main frontend CSS
+│       └── script.js            # Main frontend JS
+├── dfx.json                     # DFINITY project configuration (defines canisters)
+├── package.json                 # (If using npm for frontend tooling)
+├── README.md                    # Project documentation
+└── .gitignore                   # Files to ignore in Git
 ```
+
 ---
 
 ## 💡 Tech Stack
 
-| Layer       | Tools                     |
-|-------------|---------------------------|
-| Frontend    | HTML5, CSS3, JavaScript   |
-| Blockchain  | Internet Computer Protocol (ICP) |
-| Storage     | On-chain hash storage |
-| AI Module   | (In Progress) Web & Social similarity checker |
-
-<!-- Note: File uploads are not currently supported (hash storage only) -->
----
-
-## 🔐 Wallet Authentication
-
-- Users must sign in with their **Solana** wallet
-- Paste their **public key**
-- Key is stored only in `localStorage` for session persistence
-- No private keys, emails, or user data collected
-
----
-
-## 🧪 Development Notes
-
-### File: `index.html`
-- Main landing page
-- Connect wallet + call to action to upload or verify
-
-### File: `about.html`
-- Tabbed section: *Our Vision*, *Expertise*, *Innovation in Protection*
-- Script toggles tabs and applies `.active` class
-
-### Shared Script:
-```js
-localStorage.setItem('vaultstampKey', walletPublicKey);
-```
-
-> All wallet activity is client-side and non-custodial.
+| Layer       | Tools / Files                        |
+|-------------|-------------------------------------|
+| Frontend    | HTML5, CSS3, JavaScript (`index.html`, `style.css`, `script.js`) |
+| Blockchain  | Internet Computer Protocol (ICP)    |
+| Backend     | Motoko (`main.mo`)                  |
+| Config      | `dfx.json` (ICP canister/project config) |
+| Storage     | On-chain hash storage               |
+| AI Module   | (Planned) Web & Social similarity checker |
 
 ---
 
@@ -99,18 +111,6 @@ localStorage.setItem('vaultstampKey', walletPublicKey);
 - [ ] IPFS support for permanent design storage (opt-in)
 - [ ] Browser drag-and-drop upload
 - [ ] Email alerts when a match is detected
-
----
-
-## 🛠️ How to Contribute
-
-1. Fork the repository  
-2. Create a new branch  
-   ```bash
-   git checkout -b feature/amazing-feature
-   ```
-3. Commit and push your changes  
-4. Submit a Pull Request!
 
 ---
 
