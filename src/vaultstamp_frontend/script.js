@@ -321,3 +321,31 @@ document.addEventListener('DOMContentLoaded', async () => {
   updateSignInUI();
   loadUploadedFiles();
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+  const welcomeTitle = document.getElementById('welcomeTitle');
+  if (welcomeTitle) {
+    const spans = welcomeTitle.querySelectorAll('span');
+    spans.forEach((span, i) => {
+      setTimeout(() => {
+        span.classList.add('visible');
+      }, i * 400); // 400ms delay between each word
+    });
+  }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  const typewriterElem = document.getElementById('welcomeTypewriter');
+  if (typewriterElem) {
+    const text = "Welcome to VaultStamp";
+    let i = 0;
+    function type() {
+      if (i <= text.length) {
+        typewriterElem.textContent = text.slice(0, i);
+        i++;
+        setTimeout(type, 120); // Slower typing speed
+      }
+    }
+    type();
+  }
+});
