@@ -10,7 +10,7 @@
         "vaultstamp_backend"
       ],
       "source": [
-        "src/vaultstamp_frontend"
+        "src/vaultstamp_frontend/dist"
       ],
       "type": "assets"
     }

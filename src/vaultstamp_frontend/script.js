@@ -1,25 +1,36 @@
+import { HttpAgent, Actor } from "@dfinity/agent";
+import { idlFactory as vaultstamp_backend_idl } from "../declarations/vaultstamp_backend/index.js";
+import canisterIds from "./canister_ids.json";
+
+const vaultstamp_backend_id = canisterIds.vaultstamp_backend.local;
+
 document.addEventListener('DOMContentLoaded', () => {
   // ------------------------
   // 📄 Navigation + Views
   // ------------------------
 
-  const navLinks = document.querySelectorAll('.nav-links a');
+  const navLinks = document.querySelectorAll('.nav-links a, .action-btn');
   const views = document.querySelectorAll('.view');
-
+  
   function showView(viewId) {
     views.forEach(v => v.classList.toggle('active', v.id === viewId));
-    navLinks.forEach(link => link.classList.toggle('active', link.dataset.view === viewId));
+    // Only set active class on navbar links
+    document.querySelectorAll('.nav-links a').forEach(link =>
+      link.classList.toggle('active', link.dataset.view === viewId)
+    );
   }
-
+  
   navLinks.forEach(link => {
     link.addEventListener('click', e => {
       e.preventDefault();
       const viewId = link.dataset.view;
-      showView(viewId);
-      window.scrollTo(0, 0);
+      if (viewId) {
+        showView(viewId);
+        window.scrollTo(0, 0);
+      }
     });
   });
-
+  
   showView('home'); // default
 
   // ------------------------
@@ -44,8 +55,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // ------------------------
 
   let loggedInKey = null;
-  const STORAGE_KEY_UPLOADS = 'userUploads';
-  const userUploads = {};
 
   function updateSignInUI() {
     const loginBtn = document.getElementById('loginBtn');
@@ -108,25 +117,21 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ------------------------
-  // 🧠 Storage Helpers
+  // 🧠 IC Canister Setup
   // ------------------------
 
-  function saveUploadsToStorage() {
-    localStorage.setItem(STORAGE_KEY_UPLOADS, JSON.stringify(userUploads));
+  const agent = new HttpAgent();
+  if (
+    window.location.hostname === "localhost" ||
+    window.location.hostname.endsWith(".localhost") ||
+    window.location.hostname === "127.0.0.1"
+  ) {
+    agent.fetchRootKey();
   }
-
-  function loadUploadsFromStorage() {
-    const stored = localStorage.getItem(STORAGE_KEY_UPLOADS);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      for (const userKey in parsed) {
-        userUploads[userKey] = parsed[userKey];
-      }
-    }
-  }
+  const vaultstamp_backend = Actor.createActor(vaultstamp_backend_idl, { agent, canisterId: vaultstamp_backend_id });
 
   // ------------------------
-  // 📤 Upload + Verify Logic
+  // 📤 Upload + Verify Logic (On-chain)
   // ------------------------
 
   async function calculateSHA256(fileOrString) {
@@ -138,27 +143,17 @@ document.addEventListener('DOMContentLoaded', () => {
       .map(b => b.toString(16).padStart(2, '0')).join('');
   }
 
-  async function storeHashLocally(hash) {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (!loggedInKey) {
-          reject(new Error("You must be signed in to upload."));
-          return;
-        }
-        if (!userUploads[loggedInKey]) userUploads[loggedInKey] = [];
+  async function storeHashOnChain(hash) {
+    if (!loggedInKey) throw new Error("Wallet not connected");
+    // Returns Motoko Timestamp (Int)
+    const timestamp = await vaultstamp_backend.uploadDesign(hash, loggedInKey);
+    return timestamp;
+  }
 
-        const duplicate = userUploads[loggedInKey].some(upload => upload.hash === hash);
-        if (duplicate) {
-          reject(new Error("This file has already been uploaded."));
-          return;
-        }
-
-        const timestamp = new Date().toISOString();
-        userUploads[loggedInKey].push({ hash, timestamp });
-        saveUploadsToStorage();
-        resolve({ proofId: userUploads[loggedInKey].length, timestamp });
-      }, 700);
-    });
+  async function verifyHashOnChain(hash) {
+    // Returns ?(Timestamp, WalletAddress)
+    const result = await vaultstamp_backend.verifyDesign(hash);
+    return result;
   }
 
   async function handleUploadForm(e) {
@@ -185,11 +180,12 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    statusElem.textContent = "Uploading and timestamping...";
+    statusElem.textContent = "Uploading and timestamping (on-chain)...";
 
     try {
-      const result = await storeHashLocally(hash);
-      statusElem.innerHTML = `✅ Uploaded! Proof ID: #${result.proofId}<br/>⏱️ Timestamp: ${result.timestamp}`;
+      const timestamp = await storeHashOnChain(hash);
+      const dateStr = new Date(Number(timestamp) / 1000000).toISOString(); // Motoko Timestamp is in nanoseconds
+      statusElem.innerHTML = `✅ Uploaded to blockchain!<br/>⏱️ Timestamp: ${dateStr}`;
 
       if (fileInput) fileInput.value = '';
       if (hashInput) hashInput.value = '';
@@ -198,21 +194,6 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (err) {
       statusElem.textContent = `❌ Error: ${err.message}`;
     }
-  }
-
-  async function verifyHashLocally(hash) {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        for (const userKey in userUploads) {
-          const found = userUploads[userKey].find(u => u.hash === hash);
-          if (found) {
-            resolve(found.timestamp);
-            return;
-          }
-        }
-        resolve(null);
-      }, 700);
-    });
   }
 
   async function handleVerifyForm(e) {
@@ -239,22 +220,22 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    resultElem.textContent = "Verifying...";
-    const timestamp = await verifyHashLocally(hash);
+    resultElem.textContent = "Verifying (on-chain)...";
+    const result = await verifyHashOnChain(hash);
 
-    if (timestamp) {
-      resultElem.innerHTML = `✅ Document verified!<br/>⏱️ Timestamp: ${timestamp}`;
+    if (result) {
+      const [timestamp, wallet] = result;
+      const dateStr = new Date(Number(timestamp) / 1000000).toISOString();
+      resultElem.innerHTML = `✅ Document verified on blockchain!<br/>⏱️ Timestamp: ${dateStr}<br/>Wallet: ${shortenKey(wallet)}`;
     } else {
-      resultElem.textContent = "❌ Document not found.";
+      resultElem.textContent = "❌ Document not found on blockchain.";
     }
   }
 
   async function fetchUserUploads() {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        resolve(userUploads[loggedInKey] || []);
-      }, 400);
-    });
+    // Optionally, you can fetch all uploads for the logged-in wallet from the canister if you add such a method.
+    // For now, just show a message.
+    return [];
   }
 
   async function loadUploadedFiles() {
@@ -266,18 +247,8 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    const uploads = await fetchUserUploads();
-
-    if (uploads.length === 0) {
-      listElem.innerHTML = "<li>No uploaded documents found.</li>";
-      return;
-    }
-
-    const listHTML = uploads.map((upload, i) =>
-      `<li><strong>Proof #${i + 1}</strong><br/>Hash: <code>${upload.hash}</code><br/>Timestamp: ${upload.timestamp}</li>`
-    ).join('');
-
-    listElem.innerHTML = listHTML;
+    // Optionally, fetch uploads from backend if you add such a method.
+    listElem.innerHTML = "<li>Uploads are stored on-chain. Use the verify form to check a document.</li>";
   }
 
   // ------------------------
@@ -293,8 +264,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const verifyForm = document.getElementById('verifyForm');
   if (verifyForm) verifyForm.addEventListener('submit', handleVerifyForm);
 
-  loadUploadsFromStorage();
   updateSignInUI();
   loadUploadedFiles();
 });
-

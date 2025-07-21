@@ -4,6 +4,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>VaultStamp</title>
   <link rel="stylesheet" href="style.css" />
+  <script type="module" src="script.js"></script>
   <!-- Solana Wallet Adapter -->
   <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.92.0/lib/index.iife.min.js"></script>
 </head>
@@ -11,15 +12,14 @@
 
   <header class="header">
     <div class="navbar">
-      <span class="logo-text">VaultStamp</span>
       <nav class="nav-links">
         <a href="#" data-view="home" class="active">Home</a>
         <a href="#" data-view="about">About</a>
         <a href="#" data-view="upload">Upload</a>
         <a href="#" data-view="verify">Verify</a>
-        <a href="#" data-view="uploads">Uploaded Files</a>
+        <a href="#" data-view="uploads">Uploads</a>
+        <button id="loginBtn">Connect Wallet</button>
       </nav>
-      <button id="loginBtn" class="sign-in-btn">Connect Wallet</button>
     </div>
   </header>
 
@@ -27,24 +27,23 @@
 
     <!-- Home -->
     <section id="home" class="view active">
-      <section class="welcome">
-        <h1>Welcome to VaultStamp</h1>
-        <p>Protect your original designs with blockchain timestamps and AI-powered plagiarism alerts.</p>
-        <div class="action-buttons">
-          <a href="#" class="action-btn" data-view="upload">Upload a Design</a>
-          <a href="#" class="action-btn" data-view="verify">Check for Matches</a>
-        </div>
-      </section>
-
-      <section class="about-preview">
-        <h2>What is VaultStamp?</h2>
-        <p>
-          VaultStamp helps creators prove ownership of their logos, images, and designs.
-          Your upload is hashed, timestamped, and stored on-chain using Internet Computer Protocol (ICP).
-          The integrated AI scans social media for lookalike content — and if it detects a 90%+ match, you'll be notified directly.
-        </p>
-      </section>
+    <section class="welcome">
+      <h1>Welcome to VaultStamp</h1>
+      <p>Protect your original designs with blockchain timestamps and AI-powered plagiarism alerts.</p>
+      <div class="action-buttons">
+        <a href="#" class="action-btn" data-view="upload">Upload a Design</a>
+        <a href="#" class="action-btn" data-view="verify">Check for Matches</a>
+      </div>
     </section>
+    <section class="about-preview">
+      <h2>What is VaultStamp?</h2>
+      <p>
+        VaultStamp helps creators prove ownership of their logos, images, and designs.
+        Your upload is hashed, timestamped, and stored on-chain using Internet Computer Protocol (ICP).
+        The integrated AI scans social media for lookalike content — and if it detects a 90%+ match, you'll be notified directly.
+      </p>
+   </section>
+  </section>
 
     <!-- About -->
     <section id="about" class="view">
@@ -57,9 +56,9 @@
       </section>
 
       <div class="tabs-container">
-        <button class="tab-button active" data-tab="vision">Our Vision</button>
-        <button class="tab-button" data-tab="expertise">Our Expertise</button>
-        <button class="tab-button" data-tab="innovation">Innovation in Protection</button>
+        <button class="tab-button active" data-tab="vision">Vision</button>
+        <button class="tab-button" data-tab="expertise">Expertise</button>
+        <button class="tab-button" data-tab="innovation">Innovation</button>
       </div>
 
       <div class="tab-content-container">
@@ -119,76 +118,5 @@
 
   </main>
 
-  <script>
-    // Navigation between views
-    const navLinks = document.querySelectorAll('.nav-links a');
-    const views = document.querySelectorAll('.view');
-
-    navLinks.forEach(link => {
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        const targetView = link.dataset.view;
-
-        // Set active nav link
-        navLinks.forEach(l => l.classList.remove('active'));
-        link.classList.add('active');
-
-        // Show target view, hide others
-        views.forEach(view => {
-          if(view.id === targetView) {
-            view.classList.add('active');
-          } else {
-            view.classList.remove('active');
-          }
-        });
-      });
-    });
-
-    // Tabs inside About page
-    const tabs = document.querySelectorAll('.tab-button');
-    const tabContents = document.querySelectorAll('.tab-content');
-
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        tabs.forEach(t => t.classList.remove('active'));
-        tabContents.forEach(tc => tc.classList.remove('active'));
-
-        tab.classList.add('active');
-        document.getElementById(tab.dataset.tab).classList.add('active');
-      });
-    });
-
-    // Solana wallet connection
-    const loginBtn = document.getElementById('loginBtn');
-    loginBtn.addEventListener('click', async () => {
-      try {
-        if (!window.solana || !window.solana.isPhantom) {
-          alert("Phantom wallet not found. Please install it.");
-          return;
-        }
-
-        const resp = await window.solana.connect();
-        const publicKey = resp.publicKey.toString();
-
-        loginBtn.textContent = Wallet Connected:\n${publicKey.slice(0, 6)}...${publicKey.slice(-4)}\n(Click to Disconnect);
-        loginBtn.style.whiteSpace = "pre-line";
-
-        loginBtn.onclick = async () => {
-          await window.solana.disconnect();
-          loginBtn.textContent = "Connect Wallet";
-          loginBtn.onclick = async () => {
-            const resp = await window.solana.connect();
-            const publicKey = resp.publicKey.toString();
-            loginBtn.textContent = Wallet Connected:\n${publicKey.slice(0, 6)}...${publicKey.slice(-4)}\n(Click to Disconnect);
-          };
-        };
-      } catch (err) {
-        console.error(err);
-        alert("Wallet connection failed.");
-      }
-    });
-  </script>
-
-  <script type="module" src="script.js"></script>
 </body>
 </html>
