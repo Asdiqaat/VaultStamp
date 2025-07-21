@@ -10,12 +10,10 @@ body.dark-bg, body {
 /* ----------------------- */
 /* Header styles (common for Home and About) */
 header, .header {
-  background-color: #1e1e1e;
-  padding: 16px 32px;
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: #181818;
 }
 
 .header-container, .navbar {
@@ -25,6 +23,12 @@ header, .header {
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
+}
+
+.logo {
+  height: 60px;
+  margin-right: 2.5rem; /* space between logo and nav */
+  display: block;
 }
 
 .logo-text {
@@ -37,22 +41,22 @@ header, .header {
 /* Navigation links */
 .nav-links {
   display: flex;
-  gap: 20px;
+  align-items: center;
+  gap: 2.5rem; /* more space between links */
   justify-content: center;
   flex: 1;
 }
 
 .nav-links a {
-  color: #b0b0b0;
+  color: #fff;
   text-decoration: none;
-  padding: 8px 12px;
-  border-radius: 6px;
-  transition: all 0.3s ease;
+  font-size: 1.1rem;
+  padding: 0.5rem 0.8rem;
+  transition: color 0.2s;
 }
 
 .nav-links a:hover {
-  color: #964de3;
-  background-color: rgba(150, 77, 227, 0.1);
+  color: #00ffd0;
 }
 
 .nav-links a.active {
@@ -142,9 +146,10 @@ header, .header {
 
 /* Tagline section (About) */
 .tagline-section {
-  padding: 6rem 2rem 4rem;
+  padding: 2.5rem 2rem 2rem;
   background-color: transparent;
   text-align: center;
+  margin-bottom: 0.5rem; /* Reduce this value to decrease space below the slogan */
 }
 
 .huge-tagline h1 {
@@ -154,6 +159,7 @@ header, .header {
   color: white;
   max-width: 1000px;
   margin: 0 auto;
+  margin-bottom: 0.5rem; /* Add or reduce this if needed */
 }
 
 /* Tabs container */
