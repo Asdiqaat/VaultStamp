@@ -4,7 +4,7 @@ import canisterIds from "./canister_ids.json";
 
 const vaultstamp_backend_id = canisterIds.vaultstamp_backend.local;
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   // ------------------------
   // 📄 Navigation + Views
   // ------------------------
@@ -14,7 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
   
   function showView(viewId) {
     views.forEach(v => v.classList.toggle('active', v.id === viewId));
-    // Only set active class on navbar links
     document.querySelectorAll('.nav-links a').forEach(link =>
       link.classList.toggle('active', link.dataset.view === viewId)
     );
@@ -126,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.location.hostname.endsWith(".localhost") ||
     window.location.hostname === "127.0.0.1"
   ) {
-    agent.fetchRootKey();
+    await agent.fetchRootKey();
   }
   const vaultstamp_backend = Actor.createActor(vaultstamp_backend_idl, { agent, canisterId: vaultstamp_backend_id });
 
@@ -145,13 +144,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function storeHashOnChain(hash) {
     if (!loggedInKey) throw new Error("Wallet not connected");
-    // Returns Motoko Timestamp (Int)
     const timestamp = await vaultstamp_backend.uploadDesign(hash, loggedInKey);
     return timestamp;
   }
 
   async function verifyHashOnChain(hash) {
-    // Returns ?(Timestamp, WalletAddress)
     const result = await vaultstamp_backend.verifyDesign(hash);
     return result;
   }
@@ -180,11 +177,24 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    // Prevent re-upload: check if already uploaded
+    try {
+      const uploads = await vaultstamp_backend.getUploadsByWallet(loggedInKey);
+      const alreadyUploaded = uploads.some(([h, ts]) => h === hash);
+      if (alreadyUploaded) {
+        statusElem.textContent = "❌ This file/hash has already been uploaded.";
+        return;
+      }
+    } catch (err) {
+      statusElem.textContent = `❌ Error checking existing uploads: ${err.message}`;
+      return;
+    }
+
     statusElem.textContent = "Uploading and timestamping (on-chain)...";
 
     try {
       const timestamp = await storeHashOnChain(hash);
-      const dateStr = new Date(Number(timestamp) / 1000000).toISOString(); // Motoko Timestamp is in nanoseconds
+      const dateStr = new Date(Number(timestamp) / 1000000).toISOString();
       statusElem.innerHTML = `✅ Uploaded to blockchain!<br/>⏱️ Timestamp: ${dateStr}`;
 
       if (fileInput) fileInput.value = '';
@@ -220,22 +230,55 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    resultElem.textContent = "Verifying (on-chain)...";
-    const result = await verifyHashOnChain(hash);
-
-    if (result) {
-      const [timestamp, wallet] = result;
-      const dateStr = new Date(Number(timestamp) / 1000000).toISOString();
-      resultElem.innerHTML = `✅ Document verified on blockchain!<br/>⏱️ Timestamp: ${dateStr}<br/>Wallet: ${shortenKey(wallet)}`;
-    } else {
-      resultElem.textContent = "❌ Document not found on blockchain.";
+    // Local check: see if hash is in uploads for this wallet
+    try {
+      const uploads = await vaultstamp_backend.getUploadsByWallet(loggedInKey);
+      const found = uploads.find(([h, ts]) => h === hash);
+      if (found) {
+        const [_, ts] = found;
+        const dateStr = new Date(Number(ts) / 1000000).toISOString();
+        resultElem.innerHTML = `
+          ✅ Document found in your uploads (local check)!<br/>
+          <b>Hash:</b> ${hash}<br/>
+          ⏱️ <b>Timestamp:</b> ${dateStr}<br/>
+          <b>Wallet:</b> ${shortenKey(loggedInKey)}
+        `;
+        return;
+      }
+    } catch (err) {
+      // Ignore local check errors, fallback to backend
     }
-  }
 
-  async function fetchUserUploads() {
-    // Optionally, you can fetch all uploads for the logged-in wallet from the canister if you add such a method.
-    // For now, just show a message.
-    return [];
+    // Fallback: check backend as before
+    resultElem.textContent = "Verifying if it's on chain...";
+    console.log("Verifying hash:", hash);
+    const result = await verifyHashOnChain(hash);
+    console.log("verifyDesign result:", result);
+
+    let tuple = null;
+    if (result && Array.isArray(result) && result.length === 2) {
+      tuple = result;
+    } else if (result && typeof result === "object" && "Ok" in result && Array.isArray(result.Ok)) {
+      tuple = result.Ok;
+    } else if (result && typeof result === "object" && "Some" in result && Array.isArray(result.Some)) {
+      tuple = result.Some;
+    }
+
+    if (tuple) {
+      const [timestamp, wallet] = tuple;
+      const dateStr = new Date(Number(timestamp) / 1000000).toISOString();
+      resultElem.innerHTML = `
+        ✅ Document verified on blockchain!<br/>
+        <b>Hash:</b> ${hash}<br/>
+        ⏱️ <b>Timestamp:</b> ${dateStr}<br/>
+        <b>Wallet:</b> ${shortenKey(wallet)}
+      `;
+    } else {
+      resultElem.innerHTML = `
+        ❌ Document not found on blockchain.<br/>
+        <b>Hash checked:</b> ${hash}
+      `;
+    }
   }
 
   async function loadUploadedFiles() {
@@ -247,8 +290,19 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Optionally, fetch uploads from backend if you add such a method.
-    listElem.innerHTML = "<li>Uploads are stored on-chain. Use the verify form to check a document.</li>";
+    try {
+      const uploads = await vaultstamp_backend.getUploadsByWallet(loggedInKey);
+      if (uploads.length === 0) {
+        listElem.innerHTML = "<li>No uploads found for this wallet.</li>";
+        return;
+      }
+      listElem.innerHTML = uploads.map(
+        ([hash, ts]) =>
+          `<li><b>Hash:</b> ${hash}<br/><b>Timestamp:</b> ${new Date(Number(ts) / 1000000).toISOString()}</li>`
+      ).join("");
+    } catch (err) {
+      listElem.innerHTML = `<li>Error loading uploads: ${err.message}</li>`;
+    }
   }
 
   // ------------------------

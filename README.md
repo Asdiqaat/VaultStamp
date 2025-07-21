@@ -1,59 +1,128 @@
-# `vaultstamp`
 
-Welcome to your new `vaultstamp` project and to the Internet Computer development community. By default, creating a new project adds this README and some template files to your project directory. You can edit these template files to customize your project and to include your own code to speed up the development cycle.
+# 🛡️ VaultStamp
 
-To get started, you might want to explore the project directory structure and the default configuration file. Working with this project in your development environment will not affect any production deployment or identity tokens.
+Protect your creative work with blockchain timestamps and AI-powered originality verification.
 
-To learn more before you start working with `vaultstamp`, see the following documentation available online:
+VaultStamp helps designers, creators, and innovators prove ownership of their digital content — using Internet Computer Protocol (ICP), Solana wallets, and intelligent plagiarism detection.
 
-- [Quick Start](https://internetcomputer.org/docs/current/developer-docs/setup/deploy-locally)
-- [SDK Developer Tools](https://internetcomputer.org/docs/current/developer-docs/setup/install)
-- [Motoko Programming Language Guide](https://internetcomputer.org/docs/current/motoko/main/motoko)
-- [Motoko Language Quick Reference](https://internetcomputer.org/docs/current/motoko/main/language-manual)
+---
 
-If you want to start working on your project right away, you might want to try the following commands:
+## ✨ Features
 
-```bash
-cd vaultstamp/
-dfx help
-dfx canister --help
-```
+- 🔏 **Blockchain Timestamping** — using ICP, cheap and safest. Cryptographic proof that your design existed first  
+- 🧠 **AI Similarity Detection** — Scan the web for 90%+ matches of your work  
+     ---
 
-## Running the project locally
+## 🖼️ Overview
 
-If you want to test your project locally, you can use the following commands:
+A simple, clean UI for uploading, verifying, and protecting original digital creations.
 
-```bash
-# Starts the replica, running in the background
-dfx start --background
 
-# Deploys your canisters to the replica and generates your candid interface
-dfx deploy
-```
+---
 
-Once the job completes, your application will be available at `http://localhost:4943?canisterId={asset_canister_id}`.
+## 🚀 Quick Start
 
-If you have made changes to your backend canister, you can generate a new candid interface with
+### Prerequisites
+
+- A modern browser (Chrome, Firefox, Edge)
+- A public key from **Solana** wallet
+- Internet access
+
+### Run Locally
 
 ```bash
-npm run generate
+git clone https://github.com/Asdiqaat/VaultStamp.git
+cd VaultStamp
 ```
 
-at any time. This is recommended before starting the frontend development server, and will be run automatically any time you run `dfx deploy`.
+Then open `src/vaultstamp_frontend/index.html` in your browser or use a live server extension (e.g. VS Code Live Server).
 
-If you are making frontend changes, you can start a development server with
+---
 
-```bash
-npm start
+## 🗂️ Project Structure
+
+```
+VaultStamp/
+├── src/
+│ ├── vaultstamp_backend/ <- Motoko backend code
+│ └── vaultstamp_frontend/ <- Frontend website (HTML, CSS, JS)
+├── dfx.json <- DFINITY project config
+├── README.md <- Project documentation
+└── .gitignore <- Files to ignore in Git
+
+```
+---
+
+## 💡 Tech Stack
+
+| Layer       | Tools                     |
+|-------------|---------------------------|
+| Frontend    | HTML5, CSS3, JavaScript   |
+| Blockchain  | Internet Computer Protocol (ICP) |
+| Storage     | On-chain hash storage |
+| AI Module   | (In Progress) Web & Social similarity checker |
+
+<!-- Note: File uploads are not currently supported (hash storage only) -->
+---
+
+## 🔐 Wallet Authentication
+
+- Users must sign in with their **Solana** wallet
+- Paste their **public key**
+- Key is stored only in `localStorage` for session persistence
+- No private keys, emails, or user data collected
+
+---
+
+## 🧪 Development Notes
+
+### File: `index.html`
+- Main landing page
+- Connect wallet + call to action to upload or verify
+
+### File: `about.html`
+- Tabbed section: *Our Vision*, *Expertise*, *Innovation in Protection*
+- Script toggles tabs and applies `.active` class
+
+### Shared Script:
+```js
+localStorage.setItem('vaultstampKey', walletPublicKey);
 ```
 
-Which will start a server at `http://localhost:8080`, proxying API requests to the replica at port 4943.
+> All wallet activity is client-side and non-custodial.
 
-### Note on frontend environment variables
+---
 
-If you are hosting frontend code somewhere without using DFX, you may need to make one of the following adjustments to ensure your project does not fetch the root key in production:
+## 🎯 Future Roadmap
 
-- set`DFX_NETWORK` to `ic` if you are using Webpack
-- use your own preferred method to replace `process.env.DFX_NETWORK` in the autogenerated declarations
-  - Setting `canisters -> {asset_canister_id} -> declarations -> env_override to a string` in `dfx.json` will replace `process.env.DFX_NETWORK` with the string in the autogenerated declarations
-- Write your own `createActor` constructor
+- [ ] AI image similarity backend (Python + ICP canister)
+- [ ] IPFS support for permanent design storage (opt-in)
+- [ ] Browser drag-and-drop upload
+- [ ] Email alerts when a match is detected
+
+---
+
+## 🛠️ How to Contribute
+
+1. Fork the repository  
+2. Create a new branch  
+   ```bash
+   git checkout -b feature/amazing-feature
+   ```
+3. Commit and push your changes  
+4. Submit a Pull Request!
+
+---
+
+## 🙌 Acknowledgments
+
+- Built during the **Brunel Hackathon 2025** 🥈
+- Inspired by creators who deserve control and recognition  
+- Special thanks to the Internet Computer Protocol (ICP) community
+
+---
+
+## 📬 Contact
+
+For issues, feature requests, or collaboration ideas, please visit our GitHub profile:  
+🔗 [https://github.com/Asdiqaat](https://github.com/Asdiqaat)

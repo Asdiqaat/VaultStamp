@@ -3,7 +3,7 @@ import HashMap "mo:base/HashMap";
 import Time "mo:base/Time";
 import List "mo:base/List";
 
-actor DocLocker {
+actor vaultstamp {
 
   type Timestamp = Int;
   type WalletAddress = Text;
@@ -32,8 +32,19 @@ actor DocLocker {
 
   /// Verifies a design hash. Returns timestamp and wallet address if found.
   public query func verifyDesign(hash: DesignHash) : async ?(Timestamp, WalletAddress) {
-    return registry.get(hash);
+    registry.get(hash)
   };
+
+  /// Returns all uploads for a given wallet.
+  public query func getUploadsByWallet(wallet: WalletAddress) : async [(Text, Int)] {
+    var result : List.List<(Text, Int)> = List.nil();
+    for ((hash, (ts, w)) in registry.entries()) {
+      if (w == wallet) {
+        result := List.push((hash, ts), result);
+      }
+    };
+    return List.toArray(List.reverse(result));
+  }; // <--- Don't forget this semicolon!
 
   /// INTERNAL: Called by AI scanner to report plagiarism.
   public func reportPlagiarism(originalHash: DesignHash, sourceUrl: Text) : async Text {
