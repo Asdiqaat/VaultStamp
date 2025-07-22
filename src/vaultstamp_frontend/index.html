@@ -11,8 +11,9 @@
 <body class="dark-bg">
 
   <header class="header">
-    <img src="public/logo.PNG" alt="VaultStamp Logo" class="logo">
     <div class="navbar">
+      <!-- Place the logo back in the header -->
+      <img class="logo" src="public/logo.PNG" alt="VaultStamp Logo" style="height: 60px; margin-right: 2.5rem;">
       <nav class="nav-links">
         <a href="#" data-view="home" class="active">Home</a>
         <a href="#" data-view="about">About</a>
@@ -28,23 +29,24 @@
 
     <!-- Home -->
     <section id="home" class="view active">
-    <section class="welcome">
-      <h1 class="typewriter" id="welcomeTypewriter"></h1>
-      <p>Protect your original designs with blockchain timestamps and AI-powered plagiarism alerts.</p>
-      <div class="action-buttons">
-        <a href="#" class="action-btn" data-view="upload">Upload a Design</a>
-        <a href="#" class="action-btn" data-view="verify">Verify Document</a>
+      <!-- Removed .home-logo div -->
+      <div class="welcome">
+        <h1 class="typewriter" id="welcomeTypewriter"></h1>
+        <p>Protect your original designs with blockchain timestamps and AI-powered plagiarism alerts.</p>
+        <div class="action-buttons">
+          <a href="#" class="action-btn" data-view="upload">Upload a Design</a>
+          <a href="#" class="action-btn" data-view="verify">Verify Document</a>
+        </div>
       </div>
+      <section class="about-preview">
+        <h2>What is VaultStamp?</h2>
+        <p>
+          VaultStamp helps creators prove ownership of their logos, images, and designs.
+          Your upload is hashed, timestamped, and stored on-chain using Internet Computer Protocol (ICP).
+          The integrated AI scans social media for lookalike content — and if it detects a 90%+ match, you'll be notified directly.
+        </p>
+     </section>
     </section>
-    <section class="about-preview">
-      <h2>What is VaultStamp?</h2>
-      <p>
-        VaultStamp helps creators prove ownership of their logos, images, and designs.
-        Your upload is hashed, timestamped, and stored on-chain using Internet Computer Protocol (ICP).
-        The integrated AI scans social media for lookalike content — and if it detects a 90%+ match, you'll be notified directly.
-      </p>
-   </section>
-  </section>
 
     <!-- About -->
     <section id="about" class="view">
@@ -119,16 +121,5 @@
 
   </main>
 
-  <div class="animated-shapes-bg">
-    <svg class="shape shape1" width="400" height="400">
-      <circle cx="200" cy="200" r="180" fill="#2F3C7E" />
-    </svg>
-    <svg class="shape shape2" width="300" height="300">
-      <circle cx="150" cy="150" r="140" fill="#F2AA4C" />
-    </svg>
-    <svg class="shape shape3" width="350" height="350">
-      <circle cx="175" cy="175" r="160" fill="#232323" />
-    </svg>
-  </div>
 </body>
 </html>
