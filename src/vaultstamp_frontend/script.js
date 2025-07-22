@@ -32,6 +32,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   
   showView('home'); // default
 
+  // Add event listener for the new 'Check Plagiarism' link
+  navLinks.forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      const viewId = link.dataset.view;
+      if (viewId) {
+        showView(viewId);
+      }
+    });
+  });
+
   // ------------------------
   // 📑 Tabs on About Page
   // ------------------------
@@ -153,6 +164,40 @@ document.addEventListener('DOMContentLoaded', async () => {
     return result;
   }
 
+  async function signUploadMetadata(hash, timestamp, deviceId, timezone, locale) {
+    const metadata = {
+      hash,
+      timestamp,
+      deviceId,
+      timezone,
+      locale, // Added locale to metadata
+    };
+
+    const metadataString = JSON.stringify(metadata);
+
+    if (window.solana && window.solana.isPhantom) {
+      try {
+        const encodedMessage = new TextEncoder().encode(metadataString);
+        const signedMessage = await window.solana.signMessage(encodedMessage, "utf8");
+        console.log("Signed Metadata:", signedMessage);
+        return signedMessage;
+      } catch (err) {
+        console.error("Error signing metadata with Phantom:", err);
+      }
+    } else if (window.ic) {
+      try {
+        const signedMessage = await window.ic.sign(metadataString);
+        console.log("Signed Metadata:", signedMessage);
+        return signedMessage;
+      } catch (err) {
+        console.error("Error signing metadata with Internet Identity:", err);
+      }
+    } else {
+      alert("No wallet or Internet Identity found for signing.");
+    }
+  }
+
+  // Integrate signing into the upload process
   async function handleUploadForm(e) {
     e.preventDefault();
 
@@ -164,6 +209,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const fileInput = document.getElementById('fileInput');
     const hashInput = document.getElementById('hashInput');
     const statusElem = document.getElementById('uploadStatus');
+    // Removed commentInput logic
 
     let hash;
 
@@ -177,28 +223,37 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    // Prevent re-upload: check if already uploaded
-    try {
-      const uploads = await vaultstamp_backend.getUploadsByWallet(loggedInKey);
-      const alreadyUploaded = uploads.some(([h, ts]) => h === hash);
-      if (alreadyUploaded) {
-        statusElem.textContent = "❌ This file/hash has already been uploaded.";
-        return;
-      }
-    } catch (err) {
-      statusElem.textContent = `❌ Error checking existing uploads: ${err.message}`;
+    const timestamp = new Date().toISOString();
+    const deviceId = "xyz"; // Replace with actual device ID logic if available
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const locale = navigator.language || navigator.userLanguage; // Capture locale
+
+    const signedMetadata = await signUploadMetadata(hash, timestamp, deviceId, timezone, locale);
+
+    if (!signedMetadata) {
+      statusElem.textContent = "❌ Error: Failed to sign metadata.";
       return;
     }
 
     statusElem.textContent = "Uploading and timestamping (on-chain)...";
 
+    console.log("Uploading with hash:", hash, "Signed Metadata:", signedMetadata); // Debug log
+    console.log("Debug: hash=", hash, "loggedInKey=", loggedInKey); // Debugging line
+
+    // Type validation for hash and loggedInKey
+    if (typeof hash !== 'string' || typeof loggedInKey !== 'string') {
+      console.error("Invalid types: hash and loggedInKey must both be strings.");
+      statusElem.textContent = "❌ Error: Invalid input types.";
+      return;
+    }
+
     try {
-      const timestamp = await storeHashOnChain(hash);
-      const dateStr = new Date(Number(timestamp) / 1000000).toISOString();
+      const blockchainTimestamp = await vaultstamp_backend.uploadDesign(hash, loggedInKey); // Removed comment
+      const dateStr = new Date(Number(blockchainTimestamp) / 1000000).toISOString();
       statusElem.innerHTML = `✅ Uploaded to blockchain!<br/>⏱️ Timestamp: ${dateStr}`;
 
       if (fileInput) fileInput.value = '';
-      if (hashInput) hashInput.value = '';
+      if (hashInput) hashInput.value = ''; // Removed commentInput
 
       loadUploadedFiles();
     } catch (err) {
@@ -238,7 +293,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const [_, ts] = found;
         const dateStr = new Date(Number(ts) / 1000000).toISOString();
         resultElem.innerHTML = `
-          ✅ Document found in your uploads (local check)!<br/>
+          ✅ Document found in your uploads!<br/>
           <b>Hash:</b> ${hash}<br/>
           ⏱️ <b>Timestamp:</b> ${dateStr}<br/>
           <b>Wallet:</b> ${shortenKey(loggedInKey)}

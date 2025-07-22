@@ -2,6 +2,8 @@ import Text "mo:base/Text";
 import HashMap "mo:base/HashMap";
 import Time "mo:base/Time";
 import List "mo:base/List";
+import Debug "mo:base/Debug";
+import Int "mo:base/Int";
 
 actor vaultstamp {
 
@@ -17,13 +19,15 @@ actor vaultstamp {
 
   /// Uploads a new design. If already exists, returns existing timestamp.
   public func uploadDesign(hash: DesignHash, wallet: WalletAddress) : async Timestamp {
+    Debug.print("uploadDesign called with hash: " # hash # ", wallet: " # wallet);
     switch (registry.get(hash)) {
       case (?entry) {
-        // Already exists
+        Debug.print("Hash already exists in registry with timestamp: " # Int.toText(entry.0));
         return entry.0;
       };
       case null {
         let now = Time.now();
+        Debug.print("Storing new entry in registry with timestamp: " # Int.toText(now));
         registry.put(hash, (now, wallet));
         return now;
       };
