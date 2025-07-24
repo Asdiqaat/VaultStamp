@@ -1,19 +1,23 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>VaultStamp</title>
+  <!-- Main stylesheet -->
   <link rel="stylesheet" href="style.css" />
+  <!-- Main JS module -->
   <script type="module" src="script.js"></script>
-  <!-- Solana Wallet Adapter -->
+  <!-- Solana Wallet Adapter for blockchain wallet connection -->
   <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.92.0/lib/index.iife.min.js"></script>
 </head>
 <body class="dark-bg">
 
+  <!-- Header with navigation and logo -->
   <header class="header">
     <div class="navbar">
-      <!-- Place the logo back in the header -->
-      <img class="logo" src="public/logo.PNG" alt="VaultStamp Logo" style="height: 60px; margin-right: 2.5rem;">
+      <!-- Logo in header, left side -->
+      <img src="public/logo.png" alt="VaultStamp Logo" class="logo" />
       <nav class="nav-links">
         <a href="#" data-view="home" class="active">Home</a>
         <a href="#" data-view="about">About</a>
@@ -28,10 +32,14 @@
 
   <main class="home-main">
 
-    <!-- Home -->
+    <!-- Home Section -->
     <section id="home" class="view active">
-      <!-- Removed .home-logo div -->
+      <!-- Centered, large logo for home page -->
+      <div class="logo-centered">
+        <img src="public/logo.png" alt="VaultStamp Logo" class="logo-big" />
+      </div>
       <div class="welcome">
+        <!-- Animated typewriter welcome text -->
         <h1 class="typewriter" id="welcomeTypewriter"></h1>
         <p>Protect your original designs with blockchain timestamps and AI-powered plagiarism alerts.</p>
         <div class="action-buttons">
@@ -39,6 +47,7 @@
           <a href="#" class="action-btn" data-view="verify">Verify Document</a>
         </div>
       </div>
+      <!-- Brief about section preview -->
       <section class="about-preview">
         <h2>What is VaultStamp?</h2>
         <p>
@@ -49,22 +58,25 @@
      </section>
     </section>
 
-    <!-- About -->
+    <!-- About Section -->
     <section id="about" class="view">
       <section class="tagline-section">
         <div class="huge-tagline">
+          <!-- Main about page tagline -->
           <h1>Lock your legacy</h1>
           <h1>Verify With Vault Stamp</h1>
           <p class="tagline-subtext">VaultStamp isn’t just about verification — it’s about protecting your creativity.</p>
         </div>
       </section>
 
+      <!-- About page tabs -->
       <div class="tabs-container">
         <button class="tab-button active" data-tab="vision">Vision</button>
         <button class="tab-button" data-tab="expertise">Expertise</button>
         <button class="tab-button" data-tab="innovation">Innovation</button>
       </div>
 
+      <!-- Tab content for About page -->
       <div class="tab-content-container">
         <section id="vision" class="tab-content active">
           <p>
@@ -86,11 +98,10 @@
       </div>
     </section>
 
-    <!-- Upload -->
+    <!-- Upload Section -->
     <section id="upload" class="view">
       <h1>Upload Document</h1>
       <p>Upload your document to VaultStamp for secure timestamping on the blockchain.</p>
-
       <form id="uploadForm">
         <input type="file" id="fileInput" /><br />
         <input type="text" id="hashInput" placeholder="Or enter hash manually" /><br />
@@ -99,11 +110,10 @@
       <p id="uploadStatus" class="status-msg"></p>
     </section>
 
-    <!-- Verify -->
+    <!-- Verify Section -->
     <section id="verify" class="view">
       <h1>Verify Document</h1>
       <p>Check the authenticity of your document by verifying its blockchain timestamp.</p>
-
       <form id="verifyForm">
         <input type="file" id="fileInputVerify" /><br />
         <input type="text" id="hashInputVerify" placeholder="Or enter hash manually" /><br />
@@ -112,23 +122,20 @@
       <p id="verifyResult" class="status-msg"></p>
     </section>
 
-    <!-- Uploaded Files -->
+    <!-- Uploaded Files Section -->
     <section id="uploads" class="view">
       <h1>Uploaded Files</h1>
       <p>View your previously uploaded documents and their verification status.</p>
-
       <ul id="uploadedFilesList"></ul>
     </section>
 
-    <!-- Plagiarism Check -->
+    <!-- Plagiarism Check Section -->
     <section id="plagiarism" class="view">
       <div class="plagiarism-container">
         <h1 class="plagiarism-title">AI-Powered Plagiarism Detection</h1>
         <p class="plagiarism-description">Our advanced AI technology is designed to help you identify potential plagiarism in your designs and documents. Stay tuned as we bring this cutting-edge feature to life, ensuring your intellectual property remains protected.</p>
       </div>
-
       <br><br>
-
       <div class="contact-lawyer-container">
         <h2 class="contact-lawyer-title">Legal Assistance at Your Fingertips</h2>
         <p class="contact-lawyer-description">Need professional legal advice? Our platform will soon connect you with experienced intellectual property lawyers to safeguard your rights and resolve disputes effectively.</p>
@@ -136,6 +143,5 @@
     </section>
 
   </main>
-
 </body>
 </html>

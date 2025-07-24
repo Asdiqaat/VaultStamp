@@ -1,17 +1,22 @@
+// Import DFINITY agent and canister interface for backend calls
 import { HttpAgent, Actor } from "@dfinity/agent";
 import { idlFactory as vaultstamp_backend_idl } from "../declarations/vaultstamp_backend/index.js";
 import canisterIds from "./canister_ids.json";
 
+// Get the backend canister ID (local or production)
 const vaultstamp_backend_id = canisterIds.vaultstamp_backend.local;
 
+// Wait for DOM to load before running main logic
 document.addEventListener('DOMContentLoaded', async () => {
   // ------------------------
   // 📄 Navigation + Views
   // ------------------------
 
+  // Get all navigation links and view sections
   const navLinks = document.querySelectorAll('.nav-links a, .action-btn');
   const views = document.querySelectorAll('.view');
   
+  // Function to show a specific view by ID and update nav link highlighting
   function showView(viewId) {
     views.forEach(v => v.classList.toggle('active', v.id === viewId));
     document.querySelectorAll('.nav-links a').forEach(link =>
@@ -19,34 +24,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     );
   }
   
+  // Add click listeners to navigation links to switch views
   navLinks.forEach(link => {
     link.addEventListener('click', e => {
       e.preventDefault();
       const viewId = link.dataset.view;
       if (viewId) {
         showView(viewId);
-        window.scrollTo(0, 0);
+        window.scrollTo(0, 0); // Scroll to top on view change
       }
     });
   });
   
-  showView('home'); // default
-
-  // Add event listener for the new 'Check Plagiarism' link
-  navLinks.forEach(link => {
-    link.addEventListener('click', e => {
-      e.preventDefault();
-      const viewId = link.dataset.view;
-      if (viewId) {
-        showView(viewId);
-      }
-    });
-  });
+  showView('home'); // Show home view by default
 
   // ------------------------
   // 📑 Tabs on About Page
   // ------------------------
 
+  // Tab navigation for About page
   const tabButtons = document.querySelectorAll('.tab-button');
   const tabContents = document.querySelectorAll('.tab-content');
 
@@ -61,11 +57,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // ------------------------
-  // 🔐 Auth System (Phantom)
+  // 🔐 Auth System (Phantom Wallet)
   // ------------------------
 
-  let loggedInKey = null;
+  let loggedInKey = null; // Stores the connected wallet public key
 
+  // Update the Connect Wallet button UI based on login state
   function updateSignInUI() {
     const loginBtn = document.getElementById('loginBtn');
     if (loggedInKey) {
@@ -75,10 +72,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
+  // Shorten wallet address for display (e.g. 0x123...abcd)
   function shortenKey(key) {
     return key.length <= 12 ? key : key.slice(0, 6) + '...' + key.slice(-4);
   }
 
+  // Handle wallet connect/disconnect logic
   async function loginUser() {
     const loginBtn = document.getElementById('loginBtn');
 
@@ -89,12 +88,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     try {
       if (!loggedInKey) {
+        // Connect to Phantom wallet
         const resp = await window.solana.connect();
         loggedInKey = resp.publicKey.toString();
         updateSignInUI();
         loadUploadedFiles();
         alert(`Signed in as: ${shortenKey(loggedInKey)}`);
       } else {
+        // Disconnect wallet
         await window.solana.disconnect();
         loggedInKey = null;
         updateSignInUI();
@@ -107,7 +108,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // Optional auto-reconnect
+  // Optional: auto-reconnect if Phantom is already connected
   if (window.solana && window.solana.isPhantom) {
     if (window.solana.isConnected) {
       loggedInKey = window.solana.publicKey.toString();
@@ -130,7 +131,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 🧠 IC Canister Setup
   // ------------------------
 
+  // Create an agent for backend communication
   const agent = new HttpAgent();
+  // Fetch root key for local development (not needed in production)
   if (
     window.location.hostname === "localhost" ||
     window.location.hostname.endsWith(".localhost") ||
@@ -138,12 +141,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   ) {
     await agent.fetchRootKey();
   }
+  // Create an actor for the backend canister
   const vaultstamp_backend = Actor.createActor(vaultstamp_backend_idl, { agent, canisterId: vaultstamp_backend_id });
 
   // ------------------------
   // 📤 Upload + Verify Logic (On-chain)
   // ------------------------
 
+  // Calculate SHA-256 hash of a file or string
   async function calculateSHA256(fileOrString) {
     const data = typeof fileOrString === 'string'
       ? new TextEncoder().encode(fileOrString)
@@ -153,17 +158,20 @@ document.addEventListener('DOMContentLoaded', async () => {
       .map(b => b.toString(16).padStart(2, '0')).join('');
   }
 
+  // Store a hash on the blockchain (calls backend canister)
   async function storeHashOnChain(hash) {
     if (!loggedInKey) throw new Error("Wallet not connected");
     const timestamp = await vaultstamp_backend.uploadDesign(hash, loggedInKey);
     return timestamp;
   }
 
+  // Verify a hash on the blockchain (calls backend canister)
   async function verifyHashOnChain(hash) {
     const result = await vaultstamp_backend.verifyDesign(hash);
     return result;
   }
 
+  // Sign upload metadata with Phantom or Internet Identity
   async function signUploadMetadata(hash, timestamp, deviceId, timezone, locale) {
     const metadata = {
       hash,
@@ -175,6 +183,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const metadataString = JSON.stringify(metadata);
 
+    // Phantom wallet signing
     if (window.solana && window.solana.isPhantom) {
       try {
         const encodedMessage = new TextEncoder().encode(metadataString);
@@ -185,6 +194,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error("Error signing metadata with Phantom:", err);
       }
     } else if (window.ic) {
+      // Internet Identity signing (if available)
       try {
         const signedMessage = await window.ic.sign(metadataString);
         console.log("Signed Metadata:", signedMessage);
@@ -197,7 +207,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // Integrate signing into the upload process
+  // Handle upload form submission: hash file, sign metadata, upload to chain
   async function handleUploadForm(e) {
     e.preventDefault();
 
@@ -209,10 +219,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const fileInput = document.getElementById('fileInput');
     const hashInput = document.getElementById('hashInput');
     const statusElem = document.getElementById('uploadStatus');
-    // Removed commentInput logic
 
     let hash;
 
+    // Get hash from file or manual input
     if (fileInput && fileInput.files.length > 0) {
       statusElem.textContent = "Calculating hash...";
       hash = await calculateSHA256(fileInput.files[0]);
@@ -223,11 +233,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
+    // Prepare metadata for signing
     const timestamp = new Date().toISOString();
     const deviceId = "xyz"; // Replace with actual device ID logic if available
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const locale = navigator.language || navigator.userLanguage; // Capture locale
 
+    // Sign metadata with wallet
     const signedMetadata = await signUploadMetadata(hash, timestamp, deviceId, timezone, locale);
 
     if (!signedMetadata) {
@@ -237,8 +249,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     statusElem.textContent = "Uploading and timestamping (on-chain)...";
 
-    console.log("Uploading with hash:", hash, "Signed Metadata:", signedMetadata); // Debug log
-    console.log("Debug: hash=", hash, "loggedInKey=", loggedInKey); // Debugging line
+    // Debug logs for troubleshooting
+    console.log("Uploading with hash:", hash, "Signed Metadata:", signedMetadata);
+    console.log("Debug: hash=", hash, "loggedInKey=", loggedInKey);
 
     // Type validation for hash and loggedInKey
     if (typeof hash !== 'string' || typeof loggedInKey !== 'string') {
@@ -247,13 +260,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
+    // Upload hash to backend canister
     try {
-      const blockchainTimestamp = await vaultstamp_backend.uploadDesign(hash, loggedInKey); // Removed comment
+      const blockchainTimestamp = await vaultstamp_backend.uploadDesign(hash, loggedInKey);
       const dateStr = new Date(Number(blockchainTimestamp) / 1000000).toISOString();
       statusElem.innerHTML = `✅ Uploaded to blockchain!<br/>⏱️ Timestamp: ${dateStr}`;
 
       if (fileInput) fileInput.value = '';
-      if (hashInput) hashInput.value = ''; // Removed commentInput
+      if (hashInput) hashInput.value = '';
 
       loadUploadedFiles();
     } catch (err) {
@@ -261,6 +275,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
+  // Handle verify form submission: hash file, check on chain, show result
   async function handleVerifyForm(e) {
     e.preventDefault();
 
@@ -275,6 +290,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     let hash;
 
+    // Get hash from file or manual input
     if (fileInput && fileInput.files.length > 0) {
       resultElem.textContent = "Calculating hash...";
       hash = await calculateSHA256(fileInput.files[0]);
@@ -310,6 +326,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const result = await verifyHashOnChain(hash);
     console.log("verifyDesign result:", result);
 
+    // Parse result tuple from backend
     let tuple = null;
     if (result && Array.isArray(result) && result.length === 2) {
       tuple = result;
@@ -319,6 +336,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       tuple = result.Some;
     }
 
+    // Show verification result to user
     if (tuple) {
       const [timestamp, wallet] = tuple;
       const dateStr = new Date(Number(timestamp) / 1000000).toISOString();
@@ -336,6 +354,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
+  // Load and display uploaded files for the connected wallet
   async function loadUploadedFiles() {
     const listElem = document.getElementById('uploadedFilesList');
     if (!listElem) return;
@@ -364,19 +383,26 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ⚙️ Event Listeners
   // ------------------------
 
+  // Connect wallet button
   const loginBtn = document.getElementById('loginBtn');
   if (loginBtn) loginBtn.addEventListener('click', loginUser);
 
+  // Upload form submit
   const uploadForm = document.getElementById('uploadForm');
   if (uploadForm) uploadForm.addEventListener('submit', handleUploadForm);
 
+  // Verify form submit
   const verifyForm = document.getElementById('verifyForm');
   if (verifyForm) verifyForm.addEventListener('submit', handleVerifyForm);
 
+  // Initial UI update and load uploads
   updateSignInUI();
   loadUploadedFiles();
 });
 
+// ------------------------
+// 🎬 Welcome Animation (Word-by-word fade-in)
+// ------------------------
 document.addEventListener('DOMContentLoaded', () => {
   const welcomeTitle = document.getElementById('welcomeTitle');
   if (welcomeTitle) {
@@ -389,6 +415,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+// ------------------------
+// ⌨️ Typewriter Animation for Welcome Text
+// ------------------------
 document.addEventListener('DOMContentLoaded', () => {
   const typewriterElem = document.getElementById('welcomeTypewriter');
   if (typewriterElem) {

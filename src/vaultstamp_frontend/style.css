@@ -1,29 +1,35 @@
-/* Color Variables */
+/* =========================
+   Color Variables
+   ========================= */
 :root {
-  --primary: #964de3;      /* Purple */
-  --background: #181824;   /* Deep Black */
-  --surface: #232136;      /* Slightly lighter for cards/sections */
-  --text: #fff;            /* White */
-  --text-light: #e5e5e5;   /* Light Gray */
-  --border: #282a36;       /* Subtle border */
+  --primary: #964de3;      /* Main purple color for branding and accents */
+  --background: #181824;   /* Deep black for backgrounds */
+  --surface: #232136;      /* Slightly lighter black for cards/sections */
+  --text: #fff;            /* White for main text */
+  --text-light: #e5e5e5;   /* Light gray for secondary text */
+  --border: #282a36;       /* Subtle border color */
 }
 
-/* General dark theme and body styles */
+/* =========================
+   General dark theme and body styles
+   ========================= */
 body.dark-bg, body {
-  background-color: #000; /* Changed to true black */
-  color: var(--text, #f0f0f0);
+  background-color: #000; /* Set background to true black */
+  color: var(--text, #f0f0f0); /* Use white text by default */
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
   padding: 0;
 }
 
-/* Header styles */
+/* =========================
+   Header styles (common for Home and About)
+   ========================= */
 header, .header {
   display: flex;
   align-items: center;
   padding: 1rem 2rem;
-  background: var(--background);
-  border-bottom: 1px solid var(--border);
+  background: var(--background); /* Use deep black background */
+  border-bottom: 1px solid var(--border); /* Subtle border at bottom */
 }
 
 .header-container, .navbar {
@@ -36,8 +42,8 @@ header, .header {
 }
 
 .logo {
-  height: 60px;
-  margin-right: 2.5rem;
+  height: 60px; /* Logo height in header */
+  margin-right: 2.5rem; /* Space between logo and nav */
   display: block;
 }
 
@@ -48,18 +54,20 @@ header, .header {
   user-select: none;
 }
 
-/* Navigation links */
+/* =========================
+   Navigation links
+   ========================= */
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 2.5rem;
+  gap: 2.5rem; /* Space between links */
   justify-content: center;
   flex: 1;
 }
 
 .nav-links a {
   position: relative;
-  color: var(--text-light);
+  color: var(--text-light); /* Light gray by default */
   text-decoration: none;
   font-size: 1.1rem;
   padding: 0.5rem 0.8rem;
@@ -71,6 +79,7 @@ header, .header {
 }
 
 .nav-links a::after {
+  /* Underline effect for active/hovered links */
   content: "";
   display: block;
   position: absolute;
@@ -86,15 +95,17 @@ header, .header {
 
 .nav-links a.active,
 .nav-links a:hover {
-  color: var(--primary);
+  color: var(--primary); /* Purple on hover/active */
 }
 
 .nav-links a.active::after,
 .nav-links a:hover::after {
-  transform: scaleX(1);
+  transform: scaleX(1); /* Show underline on hover/active */
 }
 
-/* Sign In Button */
+/* =========================
+   Sign In Button
+   ========================= */
 .sign-in-btn {
   background-color: var(--primary);
   color: #fff;
@@ -112,18 +123,22 @@ header, .header {
   color: var(--primary);
 }
 
-/* Home page main content */
+/* =========================
+   Home page main content
+   ========================= */
 .home-main {
   padding: 60px 20px;
   max-width: 1000px;
   margin: 0 auto;
 }
 
-/* Welcome section */
+/* =========================
+   Welcome section
+   ========================= */
 .welcome {
   text-align: center;
-  margin-top: 0;           /* Remove any top margin */
-  margin-bottom: 60px;
+  margin-top: -20px;      /* Pulls welcome text closer to logo */
+  margin-bottom: 48px;    /* Space below welcome section */
 }
 
 .welcome h1 {
@@ -138,7 +153,9 @@ header, .header {
   margin-bottom: 30px;
 }
 
-/* Action buttons */
+/* =========================
+   Action buttons (Home)
+   ========================= */
 .action-buttons {
   display: flex;
   justify-content: center;
@@ -163,7 +180,9 @@ header, .header {
   color: var(--primary);
 }
 
-/* About preview on home */
+/* =========================
+   About preview on home
+   ========================= */
 .about-preview {
   background-color: var(--surface);
   padding: 40px;
@@ -176,12 +195,14 @@ header, .header {
   margin-bottom: 20px;
 }
 
-/* Tagline section (About) */
+/* =========================
+   Tagline section (About)
+   ========================= */
 .tagline-section {
   padding: 2.5rem 2rem 2rem;
   background-color: transparent;
   text-align: center;
-  margin-bottom: 0.5rem; /* Reduce this value to decrease space below the slogan */
+  margin-bottom: 0.5rem; /* Space below the slogan */
 }
 
 .huge-tagline h1 {
@@ -191,10 +212,12 @@ header, .header {
   color: white;
   max-width: 1000px;
   margin: 0 auto;
-  margin-bottom: 0.5rem; /* Add or reduce this if needed */
+  margin-bottom: 0.5rem;
 }
 
-/* Tabs */
+/* =========================
+   Tabs (About)
+   ========================= */
 .tabs-container {
   display: flex;
   justify-content: center;
@@ -222,7 +245,9 @@ header, .header {
   border-color: var(--primary);
 }
 
-/* Tab content container */
+/* =========================
+   Tab content container
+   ========================= */
 .tab-content-container {
   max-width: 900px;
   margin: 0 auto 4rem;
@@ -241,7 +266,9 @@ header, .header {
   display: block;
 }
 
-/* Form inputs and buttons */
+/* =========================
+   Form inputs and buttons
+   ========================= */
 input[type="file"],
 input[type="text"] {
   width: 100%;
@@ -288,7 +315,9 @@ button:hover {
   color: var(--primary);
 }
 
-/* Status messages */
+/* =========================
+   Status messages
+   ========================= */
 .status-msg {
   margin-top: 16px;
   font-weight: 600;
@@ -300,7 +329,9 @@ button:hover {
   color: var(--primary) !important;
 }
 
-/* Hide all views by default */
+/* =========================
+   Hide all views by default
+   ========================= */
 .view {
   display: none;
 }
@@ -310,7 +341,9 @@ button:hover {
   display: block;
 }
 
-/* Tabs */
+/* =========================
+   Tabs (duplicate for safety)
+   ========================= */
 .tab-content {
   display: none;
 }
@@ -319,12 +352,17 @@ button:hover {
   display: block;
 }
 
-/* Make sure your main content is above the background */
+/* =========================
+   Make sure your main content is above the background
+   ========================= */
 body, .header, main, .view, .home-main {
   position: relative;
   z-index: 1;
 }
 
+/* =========================
+   Welcome title animation
+   ========================= */
 #welcomeTitle span {
   opacity: 0;
   display: inline-block;
@@ -337,6 +375,9 @@ body, .header, main, .view, .home-main {
   transform: translateY(0);
 }
 
+/* =========================
+   Typewriter effect for welcome
+   ========================= */
 .typewriter {
   display: inline-block;
   font-size: 3rem;
@@ -352,5 +393,22 @@ body, .header, main, .view, .home-main {
 @keyframes blink-caret {
   0%, 100% { border-color: var(--primary); }
   50% { border-color: transparent; }
+}
+
+/* =========================
+   Logo centering and sizing for home page
+   ========================= */
+.logo-centered {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin-top: 2px;      /* Minimal space below header */
+  margin-bottom: 8px;   /* Minimal space above welcome */
+}
+
+.logo-big {
+  height: 130px;         /* Bigger logo for home page */
+  max-width: 90vw;
+  display: block;
 }
 
