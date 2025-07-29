@@ -120,6 +120,12 @@ VaultStamp/
 - Inspired by creators who deserve control and recognition  
 - Special thanks to the Internet Computer Protocol (ICP) community
 
+
+# Team
+- Kaashifa Asdiqaat
+- Dia Johara Khan
+- Alisha Sana
+
 ---
 
 ## 📬 Contact
